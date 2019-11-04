@@ -96,7 +96,7 @@ class CustomerController extends Controller
     public function destroy($id)
     {   
         $customer = Customer::find($id);
-        return $customer->delete();
-        // redirect('/users')->with('status', 'Deleted Successfully!');
+        $customer->delete();
+        return redirect('api/users')->with('status', 'Delete Successfully!');
     }
 }
