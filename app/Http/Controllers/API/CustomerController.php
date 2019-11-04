@@ -41,7 +41,7 @@ class CustomerController extends Controller
      */
     public function store(Store $request)
     {
-        dd(1);
+        
         return $request->process();
 
         // redirect('/users')->with('status', 'Added Successfully!');
