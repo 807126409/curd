@@ -1,72 +1,95 @@
-<p align="center"><img src="https://res.cloudinary.com/dtfbvvkyp/image/upload/v1566331377/laravel-logolockup-cmyk-red.svg" width="400"></p>
+# Laravel Deployment
+Deployment of Laravel project on different types of servers.
 
-<p align="center">
-<a href="https://travis-ci.org/laravel/framework"><img src="https://travis-ci.org/laravel/framework.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://poser.pugx.org/laravel/framework/d/total.svg" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://poser.pugx.org/laravel/framework/v/stable.svg" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://poser.pugx.org/laravel/framework/license.svg" alt="License"></a>
-</p>
+## EC2 Deployment
+Begin the deployment by updating the local package index to reflect the latest upstream changes.
+```
+apt-get update
+apt-get upgrade
+```
+### Install Apache 2
+Now install Apache server.
+`apache2` package is available within Ubuntu's software repositories, so we will install it using `apt`.
+```
+apt-get install apache2
+```
+### Install MySQL
+```
+apt-get install mysql-server
+mysql_secure_installation
+```
+When connecting to the MySQL database, if you get an authentication error, kindly reset your root password using the following commands:
+```
+mysql
+ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY 'YOUR_NEW_PASSWORD';
+```
+### Install PHP
+To install `PHP` you first need to add `ppa:ondrej/php` to the `apt` repository.
+```
+add-apt-repository -y ppa:ondrej/php
+apt-get update
+```
+Now use the following command to install `php-fpm` and `php`.
+```
+apt-get install -y php-fpm
+apt-get install -y php
+```
+Now install some necessary php extensions and restart the server, using the following commands:
+```
+apt-get -y install curl php-pear php-mysql php-dev php-curl php-json php-mbstring php-gd php-intl php-xml php-imagick php-redis php-zip libapache2-mod-php
+systemctl restart apache2
+```
+### Install Git
+```
+apt-get install git
+```
+### Install Composer
+```
+cd ~
+curl -sS https://getcomposer.org/installer -o composer-setup.php
+```
+Visit [Composer's Pubkeys](https://composer.github.io/pubkeys.html) page to get the latest `SHA384` hash and replace it with `LATEST_SHA384_HASH` in the following command.
+```
+php -r "if (hash_file('SHA384', 'composer-setup.php') === 'LATEST_SHA384_HASH') { echo 'Installer verified'; } else { echo 'Installer corrupt'; unlink('composer-setup.php'); } echo PHP_EOL;"
+php composer-setup.php --install-dir=/usr/local/bin --filename=composer
+```
+### Setup
+```
+a2enmod rewrite
+systemctl restart apache2
+```
+```
+cd /var/www
+rm -r html
+git clone https://gitlab.com/807126409/crud.git
+cd {project_folder}
+update database name in .env file
+php artisan migrate
 
-## About Laravel
+chown -R ubuntu:www-data /var/www/{project_folder}
+find /var/www/{project_folder} -type f -exec chmod 664 {} \;
+find /var/www/{project_folder} -type d -exec chmod 775 {} \;
+chgrp -R www-data storage bootstrap/cache
+chmod -R ug+rwx storage bootstrap/cache
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+nano /etc/apache2/sites-enabled/000-default.conf
+Change DocumentRoot /var/www/{project_folder}/public
+    <Directory /var/www>
+        Options Indexes FollowSymLinks MultiViews
+        AllowOverride All
+        Order allow,deny
+        allow from all
+    </Directory>
+systemctl restart apache2
+```
+If you get the following error,
+```
+In CryptKey.php line 45:
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
-
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
-
-## Learning Laravel
-
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
-
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains over 1500 video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
-
-## Laravel Sponsors
-
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the Laravel [Patreon page](https://patreon.com/taylorotwell).
-
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Cubet Techno Labs](https://cubettech.com)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[British Software Development](https://www.britishsoftware.co)**
-- **[Webdock, Fast VPS Hosting](https://www.webdock.io/en)**
-- **[DevSquad](https://devsquad.com)**
-- [UserInsights](https://userinsights.com)
-- [Fragrantica](https://www.fragrantica.com)
-- [SOFTonSOFA](https://softonsofa.com/)
-- [User10](https://user10.com)
-- [Soumettre.fr](https://soumettre.fr/)
-- [CodeBrisk](https://codebrisk.com)
-- [1Forge](https://1forge.com)
-- [TECPRESSO](https://tecpresso.co.jp/)
-- [Runtime Converter](http://runtimeconverter.com/)
-- [WebL'Agence](https://weblagence.com/)
-- [Invoice Ninja](https://www.invoiceninja.com)
-- [iMi digital](https://www.imi-digital.de/)
-- [Earthlink](https://www.earthlink.ro/)
-- [Steadfast Collective](https://steadfastcollective.com/)
-- [We Are The Robots Inc.](https://watr.mx/)
-- [Understand.io](https://www.understand.io/)
-- [Abdel Elrafa](https://abdelelrafa.com)
-- [Hyper Host](https://hyper.host)
-
-## Contributing
-
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
-
-## Security Vulnerabilities
-
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
-
-## License
-
-The Laravel framework is open-source software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+Key path "file:///home/.../public_html/storage/oauth-private.key" does not exist or is not readable
+```
+Run the following commands to create `oauth-private.key` and `oauth-public.key` files.
+```
+openssl genrsa -out storage/oauth-private.key 4096
+openssl rsa -in storage/oauth-private.key -pubout > storage/oauth-public.key
+```
