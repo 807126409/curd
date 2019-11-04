@@ -5,8 +5,8 @@ namespace App\Http\Controllers\API;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Customer;
-use App\Http\Requests\Customer\Store;
-use App\Http\Requests\Customer\Update;
+use App\Http\Requests\API\Customer\Store;
+use App\Http\Requests\API\Customer\Update;
 
 class CustomerController extends Controller
 {
@@ -42,9 +42,9 @@ class CustomerController extends Controller
     public function store(Store $request)
     {
         dd(1);
-        $request->process();
+        return $request->process();
 
-        return redirect('/users')->with('status', 'Added Successfully!');
+        // redirect('/users')->with('status', 'Added Successfully!');
         //
     }
 
@@ -94,9 +94,9 @@ class CustomerController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function destroy($id)
-    {   dd($id);
+    {   
         $customer = Customer::find($id);
-        $customer->delete();
-        return redirect('/users')->with('status', 'Deleted Successfully!');
+        return $customer->delete();
+        // redirect('/users')->with('status', 'Deleted Successfully!');
     }
 }

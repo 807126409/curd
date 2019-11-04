@@ -19,6 +19,8 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 
 Route::resource('/users', 'API\CustomerController');
 
-Route::post('/users/{id}', 'API\CustomerController@update');
+Route::post('/users', 'API\CustomerController@store');
 
-Route::get('/users/destroy/{id}', 'Web\CustomerController@destroy');
+Route::put('/users/{id}', 'API\CustomerController@update');
+
+Route::get('/users/destroy/{id}', 'API\CustomerController@destroy');
